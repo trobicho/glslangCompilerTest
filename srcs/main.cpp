@@ -9,6 +9,9 @@ int main(int ac, char **av) {
   }
   else {
     std::cout << "Usage ./glslCompiler [FILE]" << std::endl;
+    return (EXIT_SUCCESS);
   }
+  compiler.shaderValidate();
+
   return (EXIT_SUCCESS);
 }

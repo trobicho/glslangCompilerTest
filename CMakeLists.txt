@@ -22,8 +22,12 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glslang::OSDependent
-  glslang::glslang glslang::MachineIndependent
-  glslang::GenericCodeGen glslang::OGLCompiler
+  glslang::glslang
+  glslang::MachineIndependent
+  glslang::GenericCodeGen
+  glslang::OGLCompiler
   glslang::glslang-default-resource-limits
-  glslang::SPVRemapper glslang::SPIRV glslang::HLSL
+  glslang::SPVRemapper
+  glslang::SPIRV
+  glslang::HLSL
 )

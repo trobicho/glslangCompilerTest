@@ -2,6 +2,15 @@
 #include <iostream>
 #include <stdexcept>
 
+GlslCompiler::GlslCompiler() {
+  if (!glslang::InitializeProcess())
+    throw std::runtime_error("Error with InitializeProcess");
+}
+
+GlslCompiler::~GlslCompiler() {
+  glslang::FinalizeProcess();
+}
+  
 void  GlslCompiler::setShader(const std::string &filename) {
   m_shaderIfs = std::ifstream(filename, std::ifstream::in);
   if (!m_shaderIfs.is_open())
@@ -57,8 +66,40 @@ void  GlslCompiler::shaderValidate() {
   }
 
   glslang::TShader  shader = glslang::TShader(m_stage);
-
   shader.setEnvInput(glslang::EShSourceGlsl, m_stage, glslang::EShClientVulkan, 0);
   shader.setEnvClient(glslang::EShClientNone, glslang::EShTargetClientVersion(0));
   shader.setEnvTarget(glslang::EShTargetNone, glslang::EShTargetLanguageVersion(0));
+
+  std::vector<std::string> lines;
+  for (std::string line; std::getline(m_shaderIfs, line); ) {
+    lines.push_back(line);
+  }
+  std::vector<const char *> lines_cstr;
+  lines_cstr.reserve(lines.size());
+  for (auto& line : lines) {
+    lines_cstr.push_back(line.c_str());
+  }
+  shader.setStrings(lines_cstr.data(), lines.size());
+
+  EShMessages       messages = EShMsgDefault;
+  TBuiltInResource  builtInResources;
+
+  bool  parseRet = shader.parse(&builtInResources, 0, true, messages);
+  if (!parseRet) {
+    std::cout << "parsing failed" << std::endl;
+  }
+  else {
+    std::cout << "parsing successed" << std::endl;
+  }
+  std::cout << std::endl;
+  std::cout << "INFO LOG:" << std::endl;
+  std::cout << shader.getInfoLog() << std::endl;
+  std::cout << std::endl;
+
+  std::cout << "INFO DEBUG LOG:" << std::endl;
+  std::cout << shader.getInfoDebugLog() << std::endl;
+  std::cout << std::endl;
+
+  std::cout << "INTERMEDIATE:" << std::endl;
+  std::cout << shader.getIntermediate() << std::endl;
 }

@@ -4,7 +4,8 @@
 
 class GlslCompiler {
   public:
-    GlslCompiler() {};
+    GlslCompiler();
+    ~GlslCompiler();
 
     void  setShader(const std::string &filename);
 
