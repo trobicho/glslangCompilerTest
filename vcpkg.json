@@ -1,0 +1,7 @@
+{
+	"name" : "phosphene",
+	"version" : "0.2",
+	"dependencies" : [ 
+		"glslang"
+	]
+}
