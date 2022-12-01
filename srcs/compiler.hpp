@@ -10,8 +10,11 @@ class GlslCompiler {
     void  setShader(const std::string &filename);
 
     void  shaderValidate();
+    void  printIntermediate();
 
   private:
     std::ifstream     m_shaderIfs;
     EShLanguage       m_stage = EShLanguage::EShLangVertex;
+
+    glslang::TIntermediate* m_intermediate;
 };

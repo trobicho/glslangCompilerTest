@@ -66,9 +66,11 @@ void  GlslCompiler::shaderValidate() {
   }
 
   glslang::TShader  shader = glslang::TShader(m_stage);
-  shader.setEnvInput(glslang::EShSourceGlsl, m_stage, glslang::EShClientVulkan, 0);
+  /*
+  shader.setEnvInput(glslang::EShSourceGlsl, m_stage, glslang::EShClientVulkan, 450);
   shader.setEnvClient(glslang::EShClientNone, glslang::EShTargetClientVersion(0));
   shader.setEnvTarget(glslang::EShTargetNone, glslang::EShTargetLanguageVersion(0));
+  */
 
   std::vector<std::string> lines;
   for (std::string line; std::getline(m_shaderIfs, line); ) {
@@ -77,11 +79,13 @@ void  GlslCompiler::shaderValidate() {
   std::vector<const char *> lines_cstr;
   lines_cstr.reserve(lines.size());
   for (auto& line : lines) {
+    line.append("\n");
     lines_cstr.push_back(line.c_str());
+    std::cout << line;
   }
   shader.setStrings(lines_cstr.data(), lines.size());
 
-  EShMessages       messages = EShMsgDefault;
+  EShMessages       messages = EShMsgAST;
   TBuiltInResource  builtInResources;
 
   bool  parseRet = shader.parse(&builtInResources, 0, true, messages);
@@ -99,7 +103,9 @@ void  GlslCompiler::shaderValidate() {
   std::cout << "INFO DEBUG LOG:" << std::endl;
   std::cout << shader.getInfoDebugLog() << std::endl;
   std::cout << std::endl;
+  m_intermediate = shader.getIntermediate();
+}
 
+void  GlslCompiler::printIntermediate() {
   std::cout << "INTERMEDIATE:" << std::endl;
-  std::cout << shader.getIntermediate() << std::endl;
 }
