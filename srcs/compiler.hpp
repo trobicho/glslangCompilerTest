@@ -9,7 +9,7 @@ class GlslCompiler {
 
     void  setShader(const std::string &filename);
 
-    void  shaderValidate();
+    bool  shaderValidate();
     void  printIntermediate();
 
   private:

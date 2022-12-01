@@ -60,17 +60,16 @@ void  GlslCompiler::setShader(const std::string &filename) {
   std::cout << "valid stage: " << stage << std::endl;
 }
 
-void  GlslCompiler::shaderValidate() {
+bool  GlslCompiler::shaderValidate() {
   if (!m_shaderIfs.is_open()) {
     throw std::invalid_argument("shader as not been set");
   }
 
   glslang::TShader  shader = glslang::TShader(m_stage);
-  /*
+
   shader.setEnvInput(glslang::EShSourceGlsl, m_stage, glslang::EShClientVulkan, 450);
-  shader.setEnvClient(glslang::EShClientNone, glslang::EShTargetClientVersion(0));
-  shader.setEnvTarget(glslang::EShTargetNone, glslang::EShTargetLanguageVersion(0));
-  */
+  shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_3);
+  shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_4);
 
   std::vector<std::string> lines;
   for (std::string line; std::getline(m_shaderIfs, line); ) {
@@ -87,6 +86,8 @@ void  GlslCompiler::shaderValidate() {
 
   EShMessages       messages = EShMsgAST;
   TBuiltInResource  builtInResources;
+  shader.setEntryPoint("main");
+  shader.setEnhancedMsgs();
 
   bool  parseRet = shader.parse(&builtInResources, 0, true, messages);
   if (!parseRet) {
@@ -104,6 +105,36 @@ void  GlslCompiler::shaderValidate() {
   std::cout << shader.getInfoDebugLog() << std::endl;
   std::cout << std::endl;
   m_intermediate = shader.getIntermediate();
+  
+  if (!parseRet) {
+    return (parseRet);
+  }
+
+  {
+    glslang::TProgram program;
+    program.addShader(&shader);
+    EShMessages       compileMessages = EShMsgDebugInfo;
+    bool compileRet = program.link(compileMessages);
+    compileRet &= program.buildReflection(EShReflectionDefault);
+    if (!compileRet) {
+      std::cout << "compilation failed" << std::endl;
+    }
+    else {
+      std::cout << "compilation successed" << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "INFO LOG:" << std::endl;
+    std::cout << program.getInfoLog() << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "INFO DEBUG LOG:" << std::endl;
+    std::cout << program.getInfoDebugLog() << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "REFLECTION:" << std::endl;
+    program.dumpReflection();
+    return (compileRet);
+  }
 }
 
 void  GlslCompiler::printIntermediate() {
